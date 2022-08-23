@@ -10,16 +10,34 @@ const mockUser = {
   firstName: 'Karen',
   lastName: 'Jones',
 };
-
 const registerAndLogin = async (userProps = {}) => {
   const password = userProps.password ?? mockUser.password;
-  const agent = request.agent(app);
-  const user = await UserService.create({ ...mockUser, ...userProps });
-  const { email } = user;
-  await agent.post('/api/v1/users/sessions').send({ email, password });
 
+  // Create an "agent" that gives us the ability
+  // to store cookies between requests in a test
+  const agent = request.agent(app);
+
+  // Create a user to sign in with
+  // const user = await UserService.create({ ...mockUser, ...userProps });
+
+  // ...then sign in
+  // const { email } = user;
+  const resp = await agent
+    .post('/api/v1/users')
+    .send({ ...mockUser, ...userProps });
+  const user = resp.body;
   return [agent, user];
 };
+
+// const registerAndLogin = async (userProps = {}) => {
+//   const password = userProps.password ?? mockUser.password;
+//   const agent = request.agent(app);
+//   const user = await UserService.create({ ...mockUser, ...userProps });
+//   const { email } = user;
+//   await agent.post('/api/v1/users/sessions').send({ email, password });
+
+//   return [agent, user];
+// };
 
 describe('backend-express-template routes', () => {
   beforeEach(() => {
@@ -39,7 +57,6 @@ describe('backend-express-template routes', () => {
 
   it('GET /me returns currently logged in user', async () => {
     const [agent, user] = await registerAndLogin();
-
     const res = await agent.get('/api/v1/users/me');
     // expect(res.status).toBe(200);
     expect(res.body).toEqual({
