@@ -40,7 +40,7 @@ describe('backend-express-template routes', () => {
   it('GET /me returns currently logged in user', async () => {
     const [agent, user] = await registerAndLogin();
     const res = await agent.get('/api/v1/users/me');
-    // expect(res.status).toBe(200);
+    expect(res.status).toBe(200);
     expect(res.body).toEqual({
       ...user,
       exp: expect.any(Number),
@@ -59,6 +59,30 @@ describe('backend-express-template routes', () => {
     expect(deleteUser.status).toBe(204);
     const res = await agent.get('/api/v1/users/me');
     expect(res.status).toBe(401);
+  });
+
+  it('GET /api/v1/todos should return a list of tasks', async () => {
+    const [agent] = await registerAndLogin();
+    const res = await agent.get('/api/v1/todos');
+    expect(res.status).toBe(200);
+    expect(res.body.tasks).toEqual([
+      { id: '1', 
+        task: 'Write README', 
+        completed: false, 
+        user_id: '1' },
+      {
+        id: '2',
+        task: 'Make 5 LinkedIn connections',
+        completed: true,
+        user_id: '1'
+      },
+      {
+        id: '3',
+        task: 'Write R E T R O',
+        completed: false,
+        user_id: '1'
+      }
+    ]);
   });
 
   afterAll(() => {
