@@ -2,7 +2,6 @@ const pool = require('../lib/utils/pool');
 const setup = require('../data/setup');
 const request = require('supertest');
 const app = require('../lib/app');
-const UserService = require('../lib/services/UserService');
 
 const mockUser = {
   email: 'hello@getshtdone.com',
@@ -13,31 +12,14 @@ const mockUser = {
 const registerAndLogin = async (userProps = {}) => {
   const password = userProps.password ?? mockUser.password;
 
-  // Create an "agent" that gives us the ability
-  // to store cookies between requests in a test
   const agent = request.agent(app);
 
-  // Create a user to sign in with
-  // const user = await UserService.create({ ...mockUser, ...userProps });
-
-  // ...then sign in
-  // const { email } = user;
   const resp = await agent
     .post('/api/v1/users')
     .send({ ...mockUser, ...userProps });
   const user = resp.body;
   return [agent, user];
 };
-
-// const registerAndLogin = async (userProps = {}) => {
-//   const password = userProps.password ?? mockUser.password;
-//   const agent = request.agent(app);
-//   const user = await UserService.create({ ...mockUser, ...userProps });
-//   const { email } = user;
-//   await agent.post('/api/v1/users/sessions').send({ email, password });
-
-//   return [agent, user];
-// };
 
 describe('backend-express-template routes', () => {
   beforeEach(() => {
@@ -69,6 +51,14 @@ describe('backend-express-template routes', () => {
   it('GET /me should return a 401 if not logged in', async () => {
     const resp = await request(app).get('/api/v1/users/me');
     expect(resp.status).toBe(401);
+  });
+
+  it('DELETE /api/v1/users/sessions should logout a session', async () => {
+    const [agent, user] = await registerAndLogin();
+    const deleteUser = await agent.delete('/api/v1/users/sessions');
+    expect(deleteUser.status).toBe(204);
+    const res = await agent.get('/api/v1/users/me');
+    expect(res.status).toBe(401);
   });
 
   afterAll(() => {
