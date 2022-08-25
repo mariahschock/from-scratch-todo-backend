@@ -63,28 +63,22 @@ describe('backend-express-template routes', () => {
 
   it('GET /api/v1/todos should return a list of tasks', async () => {
     const [agent] = await registerAndLogin();
+    await agent.post('/api/v1/todos').send({
+      task: 'Get some sleep',
+      completed: false,
+    });
     const res = await agent.get('/api/v1/todos');
     expect(res.status).toBe(200);
     expect(res.body.tasks).toEqual([
-      { id: '1', 
-        task: 'Write README', 
-        completed: false, 
-        user_id: '1' },
       {
-        id: '2',
-        task: 'Make 5 LinkedIn connections',
-        completed: true,
-        user_id: '1'
-      },
-      {
-        id: '3',
-        task: 'Write R E T R O',
+        id: expect.any(String),
+        task: 'Get some sleep',
+        user_id: '2',
         completed: false,
-        user_id: '1'
-      }
+      },
     ]);
   });
-  
+
   it('POST /api/v1/todos should create task for authenticated user', async () => {
     const [agent, user] = await registerAndLogin();
     const res = await agent.post('/api/v1/todos').send({
