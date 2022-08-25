@@ -84,6 +84,16 @@ describe('backend-express-template routes', () => {
       }
     ]);
   });
+  
+  it('POST /api/v1/todos should create task for authenticated user', async () => {
+    const [agent, user] = await registerAndLogin();
+    const res = await agent.post('/api/v1/todos').send({
+      task: 'Get some sleep',
+      completed: false,
+      user_id: expect.any(String),
+    });
+    expect(res.status).toBe(200);
+  });
 
   afterAll(() => {
     pool.end();
