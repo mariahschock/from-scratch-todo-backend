@@ -10,7 +10,6 @@ const mockUser = {
   lastName: 'Jones',
 };
 const registerAndLogin = async (userProps = {}) => {
-  const password = userProps.password ?? mockUser.password;
 
   const agent = request.agent(app);
 
@@ -54,7 +53,7 @@ describe('backend-express-template routes', () => {
   });
 
   it('DELETE /api/v1/users/sessions should logout a session', async () => {
-    const [agent, user] = await registerAndLogin();
+    const [agent] = await registerAndLogin();
     const deleteUser = await agent.delete('/api/v1/users/sessions');
     expect(deleteUser.status).toBe(204);
     const res = await agent.get('/api/v1/users/me');
@@ -80,7 +79,7 @@ describe('backend-express-template routes', () => {
   });
 
   it('POST /api/v1/todos should create task for authenticated user', async () => {
-    const [agent, user] = await registerAndLogin();
+    const [agent] = await registerAndLogin();
     const res = await agent.post('/api/v1/todos').send({
       task: 'Get some sleep',
       completed: false,
@@ -96,7 +95,6 @@ describe('backend-express-template routes', () => {
       completed: false,
     };
     const taskRes = await agent.post('/api/v1/todos').send(newTask);
-    console.log('taskRes', taskRes.body);
     await agent.delete(`/api/v1/todos/${taskRes.body.id}`);
     const res = await agent.get('/api/v1/todos');
     expect(res.status).toBe(200);
