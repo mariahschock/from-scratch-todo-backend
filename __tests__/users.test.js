@@ -89,7 +89,23 @@ describe('backend-express-template routes', () => {
     expect(res.status).toBe(200);
   });
 
+  it('DELETE /api/v1/todos/:id should delete task', async () => {
+    const [agent] = await registerAndLogin();
+    const newTask = {
+      task: 'Get some sleep',
+      completed: false,
+    };
+    const taskRes = await agent.post('/api/v1/todos').send(newTask);
+    console.log('taskRes', taskRes.body);
+    await agent.delete(`/api/v1/todos/${taskRes.body.id}`);
+    const res = await agent.get('/api/v1/todos');
+    expect(res.status).toBe(200);
+    expect(res.body.tasks).toEqual([]);
+  });
+
   afterAll(() => {
     pool.end();
   });
 });
+
+
